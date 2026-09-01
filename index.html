@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Presupuesto Eléctrico</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --accent: #ff9800;
+      --accent-green: #25d366;
+      --text: #ffffff;
+      --subtext: #aaaaaa;
+      --border: #333333;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+      margin: 16px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .input-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--subtext);
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    .btn-whatsapp {
+      background: #25d366;
+      color: #fff;
+      margin-top: 15px;
+    }
+    .results {
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    .result-label {
+      color: var(--subtext);
+      font-size: 0.9rem;
+    }
+    .result-val {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    .highlight {
+      color: var(--accent);
+    }
+    .divider {
+      border-top: 1px solid var(--accent);
+      margin: 12px 0;
+    }
+    .total-box {
+      background: #1e3a29;
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      text-align: center;
+    }
+    .total-box .total-title {
+      font-size: 0.85rem;
+      color: #a5d6a7;
+      text-transform: uppercase;
+    }
+    .total-box .total-amount {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #25d366;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Calculadora Eléctrica y Presupuesto</h2>
+  
+  <!-- TIPO DE TRABAJO -->
+  <div class="section-title">1. Modo de Servicio</div>
+  <div class="input-group">
+    <label for="modoServicio">Tipo de Trabajo:</label>
+    <select id="modoServicio" onchange="cambiarModoServicio()">
+      <option value="instalacion" selected>Instalación Nueva / Cableado</option>
+      <option value="revision">Revisión / Diagnóstico / Reparación</option>
+    </select>
+  </div>
+
+  <!-- SECCIÓN REVISIÓN (Oculta por defecto) -->
+  <div id="secRevision" style="display: none;">
+    <div class="input-group">
+      <label for="precioRevision">Tarifa por Revisión / Mantención ($):</label>
+      <select id="precioRevision">
+        <option value="" disabled selected>Seleccione Valor</option>
+        <option value="15000">$15.000 (Revisión básica)</option>
+        <option value="20000">$20.000 (Revisión / Diagnóstico)</option>
+        <option value="25000">$25.000 (Diagnóstico + Reparación menor)</option>
+        <option value="30000">$30.000 (Revisión de Tablero / Corto)</option>
+        <option value="35000">$35.000 (Búsqueda de falla en red)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SECCIÓN INSTALACIÓN (Visible por defecto) -->
+  <div id="secInstalacion">
+    <div class="section-title">2. Cajas de Derivación y Luz</div>
+    <div class="grid-2">
+      <div class="input-group">
+        <label for="cajasChuqui">Cajas Chuqui / Derivación:</label>
+        <input type="number" id="cajasChuqui" placeholder="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="puntosLuz">Ampolletas / Focos (Luz):</label>
+        <input type="number" id="puntosLuz" placeholder="0" min="0">
+      </div>
+    </div>
+
+    <div class="section-title">3. Enchufes</div>
+    <div class="grid-2">
+      <div class="input-group">
+        <label for="enchufesSimples">Enchufes Simples:</label>
+        <input type="number" id="enchufesSimples" placeholder="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="enchufesDobles">Enchufes Dobles:</label>
+        <input type="number" id="enchufesDobles" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="enchufesTriples">Enchufes Triples:</label>
+      <input type="number" id="enchufesTriples" placeholder="0" min="0">
+    </div>
+
+    <div class="section-title">4. Interruptores</div>
+    <div class="grid-2">
+      <div class="input-group">
+        <label for="intSimples">Simple (9/12):</label>
+        <input type="number" id="intSimples" placeholder="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="intDobles">Doble (9/15):</label>
+        <input type="number" id="intDobles" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="input-group">
+        <label for="intTriples">Triple (9/32):</label>
+        <input type="number" id="intTriples" placeholder="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="intEscalera">Escalera (9/24):</label>
+        <input type="number" id="intEscalera" placeholder="0" min="0">
+      </div>
+    </div>
+
+    <div class="section-title">5. Canalización y Tarifa</div>
+    <div class="grid-2">
+      <div class="input-group">
+        <label for="metrosRecorrido">Metros Recorrido (m):</label>
+        <input type="number" id="metrosRecorrido" placeholder="Ej: 20" min="1" step="0.5">
+      </div>
+      <div class="input-group">
+        <label for="tipoCanalizacion">Tipo Instalación:</label>
+        <select id="tipoCanalizacion">
+          <option value="" disabled selected>Seleccione</option>
+          <option value="Sobrepuesta">Sobrepuesta (Canaleta/Conduit)</option>
+          <option value="Embutida">Embutida (Muro Picado)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="precioPunto">Valor Cobro por Centro ($):</label>
+      <select id="precioPunto">
+        <option value="" disabled selected>Seleccione Tarifa</option>
+        <option value="12000">$12.000 / centro</option>
+        <option value="15000">$15.000 / centro</option>
+        <option value="18000">$18.000 / centro</option>
+        <option value="20000">$20.000 / centro</option>
+        <option value="22000">$22.000 / centro</option>
+        <option value="25000">$25.000 / centro</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="input-group" style="margin-top: 15px;">
+    <label for="telefonoCliente">WhatsApp Cliente (9 dígitos):</label>
+    <input type="tel" id="telefonoCliente" placeholder="912345678">
+  </div>
+
+  <button onclick="calcular()">CALCULAR PRESUPUESTO</button>
+
+  <!-- RESULTADOS -->
+  <div class="results" id="results">
+    <div id="resDetalleServicio"></div>
+
+    <div class="total-box">
+      <div class="total-title">Total Mano de Obra a Cobrar</div>
+      <div class="total-amount" id="precioTotal">$0</div>
+    </div>
+
+    <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 ENVIAR PRESUPUESTO POR WHATSAPP</button>
+  </div>
+</div>
+
+<script>
+  let datosResumen = {};
+
+  function fmt(val) {
+    return "$" + Math.round(val).toLocaleString('es-CL');
+  }
+
+  function cambiarModoServicio() {
+    const modo = document.getElementById('modoServicio').value;
+    if (modo === 'revision') {
+      document.getElementById('secRevision').style.display = 'block';
+      document.getElementById('secInstalacion').style.display = 'none';
+    } else {
+      document.getElementById('secRevision').style.display = 'none';
+      document.getElementById('secInstalacion').style.display = 'block';
+    }
+    document.getElementById('results').style.display = 'none';
+  }
+
+  function parpadearYEnfocar(elemento, mensaje) {
+    alert(mensaje);
+    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    elemento.focus();
+
+    let contador = 0;
+    const intervalo = setInterval(() => {
+      if (contador % 2 === 0) {
+        elemento.style.backgroundColor = '#ffeb3b';
+        elemento.style.borderColor = '#ffeb3b';
+        elemento.style.color = '#000000';
+      } else {
+        elemento.style.backgroundColor = '#2a2a2a';
+        elemento.style.borderColor = 'var(--border)';
+        elemento.style.color = '#ffffff';
+      }
+      contador++;
+
+      if (contador >= 6) {
+        clearInterval(intervalo);
+        elemento.style.backgroundColor = '';
+        elemento.style.borderColor = '';
+        elemento.style.color = '';
+      }
+    }, 200);
+  }
+
+  function limpiarCampos() {
+    document.getElementById('cajasChuqui').value = '';
+    document.getElementById('puntosLuz').value = '';
+    document.getElementById('enchufesSimples').value = '';
+    document.getElementById('enchufesDobles').value = '';
+    document.getElementById('enchufesTriples').value = '';
+    document.getElementById('intSimples').value = '';
+    document.getElementById('intDobles').value = '';
+    document.getElementById('intTriples').value = '';
+    document.getElementById('intEscalera').value = '';
+    document.getElementById('metrosRecorrido').value = '';
+    document.getElementById('tipoCanalizacion').value = '';
+    document.getElementById('precioPunto').value = '';
+    document.getElementById('precioRevision').value = '';
+    document.getElementById('telefonoCliente').value = '';
+    document.getElementById('results').style.display = 'none';
+    datosResumen = {};
+  }
+
+  function calcular() {
+    const modo = document.getElementById('modoServicio').value;
+
+    if (modo === 'revision') {
+      const selectRev = document.getElementById('precioRevision');
+      const valRev = parseFloat(selectRev.value) || 0;
+
+      if (!valRev) {
+        parpadearYEnfocar(selectRev, "Por favor selecciona el valor para la revisión o diagnóstico.");
+        return;
+      }
+
+      datosResumen = {
+        modo: 'revision',
+        totalManoObra: valRev
+      };
+
+      document.getElementById('resDetalleServicio').innerHTML = `
+        <div class="section-title">Detalle del Servicio</div>
+        <div class="result-item">
+          <span class="result-label">Tipo de Servicio:</span>
+          <span class="result-val highlight">Revisión / Reparación / Diagnóstico</span>
+        </div>
+      `;
+      document.getElementById('precioTotal').innerText = fmt(valRev);
+      document.getElementById('results').style.display = 'block';
+      return;
+    }
+
+    // Modo Instalación
+    const cChuqui = parseInt(document.getElementById('cajasChuqui').value) || 0;
+    const pLuz = parseInt(document.getElementById('puntosLuz').value) || 0;
+    const eSimples = parseInt(document.getElementById('enchufesSimples').value) || 0;
+    const eDobles = parseInt(document.getElementById('enchufesDobles').value) || 0;
+    const eTriples = parseInt(document.getElementById('enchufesTriples').value) || 0;
+    const iSimples = parseInt(document.getElementById('intSimples').value) || 0;
+    const iDobles = parseInt(document.getElementById('intDobles').value) || 0;
+    const iTriples = parseInt(document.getElementById('intTriples').value) || 0;
+    const iEscalera = parseInt(document.getElementById('intEscalera').value) || 0;
+
+    const inputMetros = document.getElementById('metrosRecorrido');
+    const selectTipo = document.getElementById('tipoCanalizacion');
+    const selectPrecio = document.getElementById('precioPunto');
+
+    const metros = parseFloat(inputMetros.value) || 0;
+    const tipo = selectTipo.value;
+    const tarifaPunto = parseFloat(selectPrecio.value) || 0;
+
+    const totalCentros = cChuqui + pLuz + eSimples + eDobles + eTriples + iSimples + iDobles + iTriples + iEscalera;
+
+    if (totalCentros <= 0) {
+      parpadearYEnfocar(document.getElementById('cajasChuqui'), "Ingresa al menos 1 caja, punto de luz, enchufe o interruptor.");
+      return;
+    }
+
+    if (metros <= 0) {
+      parpadearYEnfocar(inputMetros, "Ingresa los metros aproximados de recorrido.");
+      return;
+    }
+
+    if (!tipo) {
+      parpadearYEnfocar(selectTipo, "Selecciona si la instalación es Sobrepuesta o Embutida.");
+      return;
+    }
+
+    if (!tarifaPunto) {
+      parpadearYEnfocar(selectPrecio, "Selecciona una tarifa por centro.");
+      return;
+    }
+
+    const metrosCable = Math.ceil(metros * 3.3);
+    const tirasTubo = Math.ceil(metros / 3);
+    const costoCentros = totalCentros * tarifaPunto;
+    let recargo = (tipo === "Embutida") ? (metros * 2500) : 0;
+    const totalManoObra = costoCentros + recargo;
+
+    datosResumen = {
+      modo: 'instalacion',
+      cChuqui, pLuz,
+      eSimples, eDobles, eTriples,
+      iSimples, iDobles, iTriples, iEscalera,
+      totalCentros, metros, tipo,
+      metrosCable, tirasTubo,
+      costoCentros, recargo, tarifaPunto,
+      totalManoObra
+    };
+
+    document.getElementById('resDetalleServicio').innerHTML = `
+      <div class="section-title">Cálculo de Materiales Básicos</div>
+      <div class="result-item">
+        <span class="result-label">Total Centros Intervenidos:</span>
+        <span class="result-val highlight">${totalCentros} puntos</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Cable Est. (F+N+T):</span>
+        <span class="result-val">${metrosCable} metros</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Conduit / Canaleta (3m):</span>
+        <span class="result-val">${tirasTubo} tiras</span>
+      </div>
+
+      <div class="section-title">Presupuesto Mano de Obra</div>
+      <div class="result-item">
+        <span class="result-label">Mano de Obra Puntos:</span>
+        <span class="result-val">${fmt(costoCentros)}</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Recargo Tipo Instalación:</span>
+        <span class="result-val">${fmt(recargo)}${tipo === "Embutida" ? " (Picado)" : ""}</span>
+      </div>
+    `;
+
+    document.getElementById('precioTotal').innerText = fmt(totalManoObra);
+    document.getElementById('results').style.display = 'block';
+  }
+
+  function enviarWhatsApp() {
+    const inputTel = document.getElementById('telefonoCliente');
+    let num = inputTel.value.trim().replace(/\D/g, '');
+
+    if (!num || (num.length !== 9 && num.length !== 11)) {
+      parpadearYEnfocar(inputTel, "Ingresa un número de WhatsApp válido de 9 dígitos.");
+      return;
+    }
+
+    if (num.length === 9) num = "56" + num;
+
+    const ahora = new Date();
+    const fechaStr = ahora.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const horaStr = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const totalFormateado = fmt(datosResumen.totalManoObra) + ".-";
+
+    let mensaje = "";
+
+    if (datosResumen.modo === 'revision') {
+      mensaje = 
+`*PRESUPUESTO SERVICIO ELÉCTRICO*
+
+*FECHA:* ${fechaStr}
+*HORA:* ${horaStr}
+
+🛠️ *TIPO DE TRABAJO:* 
+• Revisión, Diagnóstico y/o Reparación Eléctrica.
+
+💰 *TOTAL PRESUPUESTO:* 
+* Mano de obra: \`${totalFormateado}\``;
+    } else {
+      let detalle = "";
+      if (datosResumen.cChuqui > 0) detalle += `• Cajas Chuqui / Derivación: ${datosResumen.cChuqui}\n`;
+      if (datosResumen.pLuz > 0) detalle += `• Ampolletas / Focos (Luz): ${datosResumen.pLuz}\n`;
+      if (datosResumen.eSimples > 0) detalle += `• Enchufes Simples: ${datosResumen.eSimples}\n`;
+      if (datosResumen.eDobles > 0) detalle += `• Enchufes Dobles: ${datosResumen.eDobles}\n`;
+      if (datosResumen.eTriples > 0) detalle += `• Enchufes Triples: ${datosResumen.eTriples}\n`;
+      if (datosResumen.iSimples > 0) detalle += `• Interruptores Simples (9/12): ${datosResumen.iSimples}\n`;
+      if (datosResumen.iDobles > 0) detalle += `• Interruptores Dobles (9/15): ${datosResumen.iDobles}\n`;
+      if (datosResumen.iTriples > 0) detalle += `• Interruptores Triples (9/32): ${datosResumen.iTriples}\n`;
+      if (datosResumen.iEscalera > 0) detalle += `• Interruptores Escalera (9/24): ${datosResumen.iEscalera}\n`;
+
+      mensaje = 
+`*PRESUPUESTO INSTALACIÓN ELÉCTRICA*
+
+*FECHA:* ${fechaStr}
+*HORA:* ${horaStr}
+
+🔌 *DETALLE DE PUNTOS Y CAJAS:*
+${detalle}
+📏 *CANALIZACIÓN Y RECORRIDO:*
+• Metros de Recorrido: ${datosResumen.metros} mt.
+• Tipo Instalación: ${datosResumen.tipo}
+
+🧰 *MATERIALES SUGERIDOS:*
+• Cables Estimados (F/N/T): ~${datosResumen.metrosCable} mt.
+• Conduit/Canaleta (tiras 3m): ~${datosResumen.tirasTubo} tiras
+
+💰 *DETALLE MANO DE OBRA:*
+• Total Centros: ${datosResumen.totalCentros} punto(s)
+• Valor base por centro: ${fmt(datosResumen.tarifaPunto)}
+${datosResumen.recargo > 0 ? `• Adicional por trabajo embutido: ${fmt(datosResumen.recargo)}\n` : ''}
+*TOTAL PRESUPUESTO:*
+* Mano de obra: \`${totalFormateado}\``;
+    }
+
+    const url = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+
+    limpiarCampos();
+  }
+</script>
+
+</body>
+</html>
