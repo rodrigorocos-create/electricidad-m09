@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Presupuesto Eléctrico</title>
+  <style>
+    :root {
+      --bg: #d10d0d;
+      --card: #1e1e1e;
+      --accent: #ff9800;
+      --accent-green: #25d366;
+      --text: #ffffff;
+      --subtext: #aaaaaa;
+      --border: #333333;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+    }
+    
+    /* ESTILOS DEL ACORDEÓN / SECCIONES */
+    .acordeon-seccion {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: #181818;
+    }
+    .acordeon-header {
+      width: 100%;
+      background: #252525;
+      color: var(--accent);
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0;
+    }
+    .acordeon-header:hover {
+      background: #2e2e2e;
+    }
+    .acordeon-contenido {
+      display: none;
+      padding: 12px;
+      background: #1e1e1e;
+      border-top: 1px solid var(--border);
+    }
+    .acordeon-seccion.activa .acordeon-contenido {
+      display: block;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--subtext);
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      height: 42px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    .btn-reset {
+      background: #333333;
+      color: #ff4d4d;
+      border: 1px solid #ff4d4d;
+      font-size: 0.9rem;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .btn-reset:hover {
+      background: #ff4d4d;
+      color: #ffffff;
+    }
+    .btn-whatsapp {
+      background: #25d366;
+      color: #fff;
+      margin-top: 15px;
+    }
+    .results {
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    .result-label {
+      color: var(--subtext);
+      font-size: 0.9rem;
+    }
+    .result-val {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.95rem;
+      text-align: right;
+    }
+    .highlight {
+      color: var(--accent);
+    }
+    .total-box {
+      background: #1e3a29;
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      text-align: center;
+    }
+    .total-box .total-title {
+      font-size: 0.85rem;
+      color: #a5d6a7;
+      text-transform: uppercase;
+    }
+    .total-box .total-amount {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #25d366;
+      margin-top: 4px;
+    }
+    .item-precio-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #262626;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .item-precio-info {
+      font-size: 0.85rem;
+      color: #fff;
+    }
+    .item-precio-info small {
+      display: block;
+      color: var(--subtext);
+      font-size: 0.75rem;
+    }
+    .item-precio-input {
+      width: 130px !important;
+      height: 36px !important;
+      padding: 6px 8px !important;
+      text-align: right;
+    }
+    .subtotal-puntos-box {
+      background: #2a2215;
+      border: 1px solid var(--accent);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+      text-align: right;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Calculadora de Presupuesto Eléctrico</h2>
+
+  <div class="input-group">
+    <label for="modoServicio">Tipo de Servicio:</label>
+    <select id="modoServicio" onchange="cambiarModoServicio()">
+      <option value="completa" selected>Instalación Eléctrica Nueva (Desde Cero)</option>
+      <option value="ampliacion">Ampliación / Modificación de Circuito</option>
+      <option value="revision">Revisión / Diagnóstico / Reparación</option>
+    </select>
+  </div>
+
+  <!-- SECCIÓN REVISIÓN -->
+  <div id="secRevision" style="display: none;">
+    <div class="acordeon-seccion activa">
+      <div class="acordeon-header">Valor de Visita / Diagnóstico</div>
+      <div class="acordeon-contenido">
+        <div class="input-group">
+          <label for="precioRevision">Seleccionar Tarifa Base Visita:</label>
+          <select id="precioRevision">
+            <option value="" disabled selected>Seleccione valor</option>
+            <option value="15000">$15.000 (Visita / Diagnóstico básico)</option>
+            <option value="20000">$20.000 (Visita estándar)</option>
+            <option value="25000">$25.000 (Visita extendida)</option>
+            <option value="30000">$30.000 (Emergencia / Zona alejada)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN INSTALACIÓN / AMPLIACIÓN -->
+  <div id="secInstalacion">
+    
+    <!-- BLOQUE 1: TABLERO -->
+    <div class="acordeon-seccion activa">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>1. Tablero y Protecciones</span>
+        <span class="icono-estado">[-]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div id="opcionesTableroCompleto">
+          <div class="input-group">
+            <label for="circuitalesEst">Cantidad de Circuitos Estimados:</label>
+            <select id="circuitalesEst">
+              <option value="2">2 Circuitos (Iluminación + Enchufes)</option>
+              <option value="3" selected>3 Circuitos (Iluminación + Enchufes + Cocina/Especial)</option>
+              <option value="4">4 Circuitos (Iluminación, Enchufes 1, Enchufes 2, Especial)</option>
+              <option value="5">5 Circuitos</option>
+              <option value="6">6 Circuitos o más</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="opcionesAmpliacion" style="display: none;">
+          <div class="input-group">
+            <label for="nuevoAutomático">¿Requiere instalar Disyuntor (PIA) nuevo en Tablero?</label>
+            <select id="nuevoAutomático">
+              <option value="si">Sí, instalar automático independiente</option>
+              <option value="no" selected>No, conectar a circuito existente</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: CAJAS -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>2. Cajas de Derivación</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="input-group">
+          <label for="cajasChuqui">Caja Chuqui / Derivación:</label>
+          <select id="cajasChuqui" onchange="actualizarListaDesglosada()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 3: ILUMINACIÓN -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>3. Puntos de Iluminación</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="input-group">
+          <label for="puntosLuz">Punto de Luz / Ampolleta:</label>
+          <select id="puntosLuz" onchange="actualizarListaDesglosada()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 4: ENCHUFES -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>4. Enchufes</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="enchufesSimples">Simple:</label>
+            <select id="enchufesSimples" onchange="actualizarListaDesglosada()"></select>
+          </div>
+          <div class="input-group">
+            <label for="enchufesDobles">Doble:</label>
+            <select id="enchufesDobles" onchange="actualizarListaDesglosada()"></select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="enchufesTriples">Triple / Especial:</label>
+          <select id="enchufesTriples" onchange="actualizarListaDesglosada()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 5: INTERRUPTORES -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>5. Interruptores</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="intSimples">Simple (9/12):</label>
+            <select id="intSimples" onchange="actualizarListaDesglosada()"></select>
+          </div>
+          <div class="input-group">
+            <label for="intDobles">Doble (9/15):</label>
+            <select id="intDobles" onchange="actualizarListaDesglosada()"></select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="intTriples">Triple (9/32):</label>
+            <select id="intTriples" onchange="actualizarListaDesglosada()"></select>
+          </div>
+          <div class="input-group">
+            <label for="intEscalera">Escalera (9/24):</label>
+            <select id="intEscalera" onchange="actualizarListaDesglosada()"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 6: CANALIZACIÓN Y COBRO -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>6. Canalización y Cobro</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="metrosRecorrido">Metros Recorrido ($1.000/m):</label>
+            <input type="number" id="metrosRecorrido" placeholder="Ej: 20" min="1" step="0.5">
+          </div>
+          <div class="input-group">
+            <label for="tipoCanalizacion">Tipo Instalación:</label>
+            <select id="tipoCanalizacion">
+              <option value="" disabled selected>Seleccione</option>
+              <option value="Sobrepuesta">Sobrepuesta (Canaleta/Conduit)</option>
+              <option value="Embutida">Embutida (Muro Picado)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="modalidadCobro">Modalidad de Cobro:</label>
+          <select id="modalidadCobro" onchange="cambiarModalidadCobro()">
+            <option value="desglosado" selected>Cobro Desglosado por Punto (Personalizado)</option>
+            <option value="global">Cerrado / Cobro Global por Instalación</option>
+          </select>
+        </div>
+
+        <!-- COBRO GLOBAL -->
+        <div class="input-group" id="grupoCobroGlobal" style="display: none;">
+          <label for="montoGlobal">Monto Global Mano de Obra ($):</label>
+          <input type="text" id="montoGlobal" placeholder="Ej: 120.000" inputmode="numeric" oninput="formatearEntradaMoneda(this); calcularSubtotalPuntosEnVivo();">
+        </div>
+
+        <!-- COBRO DESGLOSADO POR PUNTO -->
+        <div id="grupoCobroDesglosado">
+          <div class="section-title" style="font-size:0.85rem; color:var(--accent); margin: 10px 0; font-weight: bold;">Precios por Punto Seleccionado</div>
+          <div id="contenedorListaPuntos">
+            <p style="font-size: 0.85rem; color: var(--subtext); font-style: italic;">Selecciona puntos en las secciones superiores para asignar sus precios.</p>
+          </div>
+        </div>
+
+        <!-- CUADRO COSTO TOTAL POR PUNTOS -->
+        <div class="subtotal-puntos-box" id="boxSubtotalPuntos">
+          Subtotal Mano de Obra Puntos: $0
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 7: CARGA DE ELECTRODOMÉSTICOS Y PROTECCIONES -->
+    <div class="acordeon-seccion">
+      <button type="button" class="acordeon-header" onclick="toggleAcordeon(this)">
+        <span>7. Carga de Electrodomésticos y Protecciones</span>
+        <span class="icono-estado">[+]</span>
+      </button>
+      <div class="acordeon-contenido">
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="nombreElectro">Equipo:</label>
+            <input type="text" id="nombreElectro" placeholder="Ej: Hervidor">
+          </div>
+          <div class="input-group">
+            <label for="wattsElectro">Potencia (Watts):</label>
+            <input type="text" id="wattsElectro" placeholder="Ej: 2.000" inputmode="numeric" oninput="formatearEntradaMoneda(this)">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="cantElectro">Cantidad:</label>
+            <input type="number" id="cantElectro" value="1" min="1" inputmode="numeric">
+          </div>
+          <div class="input-group" style="display: flex; align-items: flex-end;">
+            <button type="button" onclick="agregarElectrodomestico()" style="margin-top: 0; padding: 10px; background: #333; color: var(--accent); border: 1px solid var(--accent); font-size: 0.9rem; height: 42px;">+ Agregar</button>
+          </div>
+        </div>
+        <div id="listaElectrodomesticos" style="margin-top: 8px;"></div>
+        
+        <div id="resultadoCarga" style="display: none; background: #18281e; border: 1px solid var(--accent-green); padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.85rem;">
+          <div><strong>Potencia Total:</strong> <span id="resWattsTotal" class="highlight">0 W</span></div>
+          <div><strong>Corriente Estimada (220V):</strong> <span id="resAmpsTotal" class="highlight">0 A</span></div>
+          <div><strong>Disyuntor (PIA) Sugerido:</strong> <span id="resDisyuntorSugerido" style="color: #25d366; font-weight: bold;">-</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="input-group" style="margin-top: 15px;">
+    <label for="telefonoCliente">WhatsApp Cliente (9 dígitos):</label>
+    <input type="tel" id="telefonoCliente" placeholder="912345678" inputmode="numeric">
+  </div>
+
+  <button onclick="calcular()">CALCULAR PRESUPUESTO</button>
+  <button type="button" class="btn-reset" onclick="limpiarFormulario()">🔄 LIMPIAR FORMULARIO</button>
+
+  <!-- RESULTADOS -->
+  <div class="results" id="results">
+    <div id="resDetalleServicio"></div>
+
+    <div class="total-box">
+      <div class="total-title">Total Mano de Obra a Cobrar</div>
+      <div class="total-amount" id="precioTotal">$0</div>
+    </div>
+
+    <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 ENVIAR PRESUPUESTO POR WHATSAPP</button>
+  </div>
+</div>
+
+<script>
+  let datosResumen = {};
+  let listaCargaElectro = [];
+
+  const itemsDef = [
+    { id: 'cajasChuqui', nombre: 'Caja Chuqui / Derivación', sub: 'Unidad', nombreWA: 'Cajas Derivación' },
+    { id: 'puntosLuz', nombre: 'Punto de Luz / Ampolleta', sub: 'Unidad', nombreWA: 'Iluminación' },
+    { id: 'enchufesSimples', nombre: 'Enchufe Simple', sub: 'Unidad', nombreWA: 'Enchufe Simple' },
+    { id: 'enchufesDobles', nombre: 'Enchufe Doble', sub: 'Unidad', nombreWA: 'Enchufe Doble' },
+    { id: 'enchufesTriples', nombre: 'Enchufe Triple / Especial', sub: 'Unidad', nombreWA: 'Enchufe Triple' },
+    { id: 'intSimples', nombre: 'Interruptor Simple (9/12)', sub: 'Unidad', nombreWA: 'Interruptor (9/12)' },
+    { id: 'intDobles', nombre: 'Interruptor Doble (9/15)', sub: 'Unidad', nombreWA: 'Interruptor (9/15)' },
+    { id: 'intTriples', nombre: 'Interruptor Triple (9/32)', sub: 'Unidad', nombreWA: 'Interruptor (9/32)' },
+    { id: 'intEscalera', nombre: 'Juego Escalera (9/24)', sub: 'Incluye 2 conmutadores', factor: 2, nombreWA: 'Interruptor Escalera (9/24)' }
+  ];
+
+  function limpiarNumero(valStr) {
+    if (!valStr) return 0;
+    return parseFloat(valStr.toString().replace(/\./g, '').replace(/,/g, '.')) || 0;
+  }
+
+  function formatearEntradaMoneda(input) {
+    let numStr = input.value.replace(/\D/g, '');
+    if (numStr === '') {
+      input.value = '';
+      return;
+    }
+    input.value = parseInt(numStr, 10).toLocaleString('es-CL');
+  }
+
+  function fmt(val) {
+    return "$" + Math.round(val).toLocaleString('es-CL');
+  }
+
+  function toggleAcordeon(boton) {
+    const seccionPadre = boton.parentElement;
+    const estaActiva = seccionPadre.classList.contains('activa');
+
+    const todasLasSecciones = document.querySelectorAll('.acordeon-seccion');
+    todasLasSecciones.forEach(sec => {
+      sec.classList.remove('activa');
+      const icono = sec.querySelector('.icono-estado');
+      if (icono) icono.innerText = '[+]';
+    });
+
+    if (!estaActiva) {
+      seccionPadre.classList.add('activa');
+      const icono = seccionPadre.querySelector('.icono-estado');
+      if (icono) icono.innerText = '[-]';
+    }
+  }
+
+  function poblarSelects() {
+    itemsDef.forEach(item => {
+      const select = document.getElementById(item.id);
+      if (select) {
+        select.innerHTML = '';
+        for (let i = 0; i <= 20; i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = i;
+          select.appendChild(opt);
+        }
+      }
+    });
+  }
+  
+  window.onload = function() {
+    poblarSelects();
+    actualizarListaDesglosada();
+    cambiarModoServicio();
+  };
+
+  function agregarElectrodomestico() {
+    const nombre = document.getElementById('nombreElectro').value.trim();
+    const watts = limpiarNumero(document.getElementById('wattsElectro').value);
+    const cant = parseInt(document.getElementById('cantElectro').value) || 1;
+
+    if (!nombre || watts <= 0) {
+      alert("Ingresa un nombre y los Watts del electrodoméstico.");
+      return;
+    }
+
+    listaCargaElectro.push({ nombre, watts, cant });
+    document.getElementById('nombreElectro').value = '';
+    document.getElementById('wattsElectro').value = '';
+    document.getElementById('cantElectro').value = '1';
+    actualizarTablaCarga();
+  }
+
+  function eliminarElectrodomestico(index) {
+    listaCargaElectro.splice(index, 1);
+    actualizarTablaCarga();
+  }
+
+  function actualizarTablaCarga() {
+    const contenedor = document.getElementById('listaElectrodomesticos');
+    const resBox = document.getElementById('resultadoCarga');
+    if (listaCargaElectro.length === 0) {
+      contenedor.innerHTML = '';
+      resBox.style.display = 'none';
+      datosResumen.cargaElectro = null;
+      return;
+    }
+
+    let html = '';
+    let totalWatts = 0;
+
+    listaCargaElectro.forEach((item, index) => {
+      const subWatts = item.watts * item.cant;
+      totalWatts += subWatts;
+      html += `
+        <div class="item-precio-row" style="margin-bottom: 6px;">
+          <div class="item-precio-info">
+            <strong>${item.nombre}</strong> (${item.cant} un. x ${item.watts.toLocaleString('es-CL')}W)
+            <small>Subtotal: ${subWatts.toLocaleString('es-CL')} W</small>
+          </div>
+          <div>
+            <button type="button" onclick="eliminarElectrodomestico(${index})" style="background: #d84315; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-top: 0; width: auto; cursor: pointer;">❌</button>
+          </div>
+        </div>
+      `;
+    });
+
+    contenedor.innerHTML = html;
+
+    const corriente = totalWatts / 220;
+    
+    let disyuntor = "10A";
+    if (corriente > 32) disyuntor = "40A (Especial / Trifásico)";
+    else if (corriente > 25) disyuntor = "32A";
+    else if (corriente > 20) disyuntor = "25A";
+    else if (corriente > 16) disyuntor = "20A";
+    else if (corriente > 10) disyuntor = "16A";
+    else disyuntor = "10A";
+
+    document.getElementById('resWattsTotal').innerText = totalWatts.toLocaleString('es-CL') + " W";
+    document.getElementById('resAmpsTotal').innerText = corriente.toFixed(1) + " A";
+    document.getElementById('resDisyuntorSugerido').innerText = disyuntor;
+    resBox.style.display = 'block';
+
+    datosResumen.cargaElectro = { lista: listaCargaElectro, totalWatts, corriente, disyuntor };
+  }
+
+  function cambiarModoServicio() {
+    const modo = document.getElementById('modoServicio').value;
+    if (modo === 'revision') {
+      document.getElementById('secRevision').style.display = 'block';
+      document.getElementById('secInstalacion').style.display = 'none';
+    } else {
+      document.getElementById('secRevision').style.display = 'none';
+      document.getElementById('secInstalacion').style.display = 'block';
+
+      if (modo === 'completa') {
+        document.getElementById('opcionesTableroCompleto').style.display = 'block';
+        document.getElementById('opcionesAmpliacion').style.display = 'none';
+      } else {
+        document.getElementById('opcionesTableroCompleto').style.display = 'none';
+        document.getElementById('opcionesAmpliacion').style.display = 'block';
+      }
+    }
+    document.getElementById('results').style.display = 'none';
+  }
+
+  function cambiarModalidadCobro() {
+    const mod = document.getElementById('modalidadCobro').value;
+    document.getElementById('grupoCobroGlobal').style.display = (mod === 'global') ? 'block' : 'none';
+    document.getElementById('grupoCobroDesglosado').style.display = (mod === 'desglosado') ? 'block' : 'none';
+    calcularSubtotalPuntosEnVivo();
+  }
+
+  function actualizarListaDesglosada() {
+    const contenedor = document.getElementById('contenedorListaPuntos');
+    let html = '';
+    let hayItems = false;
+
+    itemsDef.forEach(item => {
+      const cant = parseInt(document.getElementById(item.id).value) || 0;
+      if (cant > 0) {
+        hayItems = true;
+        const prevInput = document.getElementById('precio_item_' + item.id);
+        const valPrev = prevInput ? prevInput.value : '';
+
+        const textoCantidad = item.factor ? `${cant} juego(s) (${cant * item.factor} puntos)` : `${cant} un.`;
+
+        html += `
+          <div class="item-precio-row">
+            <div class="item-precio-info">
+              <strong>${item.nombre}</strong> (${textoCantidad})
+              <small>${item.sub}</small>
+            </div>
+            <div>
+              <input type="text" id="precio_item_${item.id}" class="item-precio-input" placeholder="$ unitario" value="${valPrev}" inputmode="numeric" oninput="formatearEntradaMoneda(this); calcularSubtotalPuntosEnVivo();">
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if (!hayItems) {
+      contenedor.innerHTML = '<p style="font-size: 0.85rem; color: var(--subtext); font-style: italic;">Selecciona puntos en las secciones superiores para asignar sus precios.</p>';
+    } else {
+      contenedor.innerHTML = html;
+    }
+    calcularSubtotalPuntosEnVivo();
+  }
+
+  function calcularSubtotalPuntosEnVivo() {
+    const modCobro = document.getElementById('modalidadCobro').value;
+    let totalPuntosCost = 0;
+
+    if (modCobro === 'desglosado') {
+      itemsDef.forEach(item => {
+        const cant = parseInt(document.getElementById(item.id).value) || 0;
+        if (cant > 0) {
+          const inp = document.getElementById('precio_item_' + item.id);
+          const pUnit = inp ? limpiarNumero(inp.value) : 0;
+          totalPuntosCost += (cant * pUnit);
+        }
+      });
+    } else {
+      const inputGlobal = document.getElementById('montoGlobal');
+      totalPuntosCost = inputGlobal ? limpiarNumero(inputGlobal.value) : 0;
+    }
+
+    document.getElementById('boxSubtotalPuntos').innerText = `Subtotal Mano de Obra Puntos: ${fmt(totalPuntosCost)}`;
+  }
+
+  function parpadearYEnfocar(elemento, mensaje) {
+    const acordeonPadre = elemento.closest('.acordeon-seccion');
+    if (acordeonPadre && !acordeonPadre.classList.contains('activa')) {
+      const btnHeader = acordeonPadre.querySelector('.acordeon-header');
+      if (btnHeader) toggleAcordeon(btnHeader);
+    }
+
+    alert(mensaje);
+    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    elemento.focus();
+
+    let contador = 0;
+    const intervalo = setInterval(() => {
+      if (contador % 2 === 0) {
+        elemento.style.backgroundColor = '#ffeb3b';
+        elemento.style.borderColor = '#ffeb3b';
+        elemento.style.color = '#000000';
+      } else {
+        elemento.style.backgroundColor = '#2a2a2a';
+        elemento.style.borderColor = 'var(--border)';
+        elemento.style.color = '#ffffff';
+      }
+      contador++;
+
+      if (contador >= 6) {
+        clearInterval(intervalo);
+        elemento.style.backgroundColor = '';
+        elemento.style.borderColor = '';
+        elemento.style.color = '';
+      }
+    }, 200);
+  }
+
+  function limpiarFormulario() {
+    if (!confirm("¿Deseas reiniciar y limpiar todos los datos del formulario?")) return;
+
+    document.getElementById('modoServicio').value = 'completa';
+    document.getElementById('precioRevision').selectedIndex = 0;
+
+    document.getElementById('circuitalesEst').value = '3';
+    document.getElementById('nuevoAutomático').value = 'no';
+
+    itemsDef.forEach(item => {
+      const sel = document.getElementById(item.id);
+      if (sel) sel.value = '0';
+    });
+
+    document.getElementById('metrosRecorrido').value = '';
+    document.getElementById('tipoCanalizacion').selectedIndex = 0;
+    document.getElementById('modalidadCobro').value = 'desglosado';
+    document.getElementById('montoGlobal').value = '';
+
+    document.getElementById('nombreElectro').value = '';
+    document.getElementById('wattsElectro').value = '';
+    document.getElementById('cantElectro').value = '1';
+    listaCargaElectro = [];
+    actualizarTablaCarga();
+
+    document.getElementById('telefonoCliente').value = '';
+
+    cambiarModoServicio();
+    cambiarModalidadCobro();
+    actualizarListaDesglosada();
+
+    datosResumen = {};
+    document.getElementById('results').style.display = 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function calcular() {
+    const modo = document.getElementById('modoServicio').value;
+
+    if (modo === 'revision') {
+      const selectRev = document.getElementById('precioRevision');
+      const valRev = limpiarNumero(selectRev.value);
+      if (!valRev) {
+        parpadearYEnfocar(selectRev, "Por favor selecciona el valor para la revisión o diagnóstico.");
+        return;
+      }
+
+      datosResumen = { modo: 'revision', totalManoObra: valRev };
+
+      document.getElementById('resDetalleServicio').innerHTML = `
+        <div style="font-size: 0.9rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 16px 0 10px 0; text-transform: uppercase;">Detalle del Servicio</div>
+        <div class="result-item">
+          <span class="result-label">Tipo de Servicio:</span>
+          <span class="result-val highlight">Revisión / Reparación / Diagnóstico</span>
+        </div>
+      `;
+      document.getElementById('precioTotal').innerText = fmt(valRev);
+      document.getElementById('results').style.display = 'block';
+      return;
+    }
+
+    const cChuqui = parseInt(document.getElementById('cajasChuqui').value) || 0;
+    const pLuz = parseInt(document.getElementById('puntosLuz').value) || 0;
+    const eSimples = parseInt(document.getElementById('enchufesSimples').value) || 0;
+    const eDobles = parseInt(document.getElementById('enchufesDobles').value) || 0;
+    const eTriples = parseInt(document.getElementById('enchufesTriples').value) || 0;
+    const iSimples = parseInt(document.getElementById('intSimples').value) || 0;
+    const iDobles = parseInt(document.getElementById('intDobles').value) || 0;
+    const iTriples = parseInt(document.getElementById('intTriples').value) || 0;
+    const iEscalera = parseInt(document.getElementById('intEscalera').value) || 0;
+
+    const inputMetros = document.getElementById('metrosRecorrido');
+    const selectTipo = document.getElementById('tipoCanalizacion');
+    const modCobro = document.getElementById('modalidadCobro').value;
+
+    const metros = parseFloat(inputMetros.value) || 0;
+    const tipo = selectTipo.value;
+
+    const totalCentros = cChuqui + pLuz + eSimples + eDobles + eTriples + iSimples + iDobles + iTriples + (iEscalera * 2);
+    if (totalCentros <= 0) {
+      parpadearYEnfocar(document.getElementById('cajasChuqui'), "Ingresa al menos 1 caja, punto de luz, enchufe o interruptor.");
+      return;
+    }
+
+    if (metros <= 0) {
+      parpadearYEnfocar(inputMetros, "Ingresa los metros aproximados de recorrido.");
+      return;
+    }
+
+    if (!tipo) {
+      parpadearYEnfocar(selectTipo, "Selecciona si la instalación es Sobrepuesta o Embutida.");
+      return;
+    }
+
+    let costoCentros = 0;
+    let desglosadoDetalle = [];
+
+    if (modCobro === 'desglosado') {
+      let faltaPrecio = false;
+      itemsDef.forEach(item => {
+        const cant = parseInt(document.getElementById(item.id).value) || 0;
+        if (cant > 0) {
+          const inp = document.getElementById('precio_item_' + item.id);
+          const pUnit = limpiarNumero(inp.value);
+          if (pUnit <= 0 && !faltaPrecio) {
+            parpadearYEnfocar(inp, `Ingresa el valor a cobrar para: ${item.nombre}`);
+            faltaPrecio = true;
+          }
+          const subTotal = cant * pUnit;
+          costoCentros += subTotal;
+          desglosadoDetalle.push({
+            nombre: item.nombre,
+            cant,
+            factor: item.factor,
+            pUnit,
+            subTotal
+          });
+        }
+      });
+      if (faltaPrecio) return;
+
+    } else {
+      const inputGlobal = document.getElementById('montoGlobal');
+      costoCentros = limpiarNumero(inputGlobal.value);
+      if (costoCentros <= 0) {
+        parpadearYEnfocar(inputGlobal, "Ingresa el monto global a cobrar por la mano de obra.");
+        return;
+      }
+    }
+
+    const costoManoObraRecorrido = metros * 1000;
+    
+    const metrosCablePorLinea = Math.ceil(metros * 1.10); 
+    const tirasTubo = Math.ceil(metros / 3);
+    
+    let nuevoAut = "no";
+    let nCirc = 0;
+    let modGabinete = 8;
+    let ampDisyuntorEnchufes = "10A";
+    let ampGeneral = "25A";
+    let ampDiferencial = "25A / 30mA";
+
+    if (datosResumen.cargaElectro && datosResumen.cargaElectro.disyuntor) {
+      ampDisyuntorEnchufes = datosResumen.cargaElectro.disyuntor;
+    }
+
+    if (modo === 'completa') {
+      nCirc = parseInt(document.getElementById('circuitalesEst').value) || 3;
+      let calcMod = (nCirc * 2) + 4; 
+      if (calcMod <= 8) modGabinete = 8;
+      else if (calcMod <= 12) modGabinete = 12;
+      else if (calcMod <= 18) modGabinete = 18;
+      else modGabinete = 24;
+    } else {
+      nuevoAut = document.getElementById('nuevoAutomático').value;
+    }
+
+    let sugerenciaCanalizacion = "";
+    const tieneEnchufes = (eSimples + eDobles + eTriples) > 0;
+    const tieneEscaleraOVar = (iEscalera > 0 || iDobles > 0 || iTriples > 0);
+
+    if (tipo === "Sobrepuesta") {
+      if (tieneEnchufes && tieneEscaleraOVar) {
+        sugerenciaCanalizacion = "Canaleta 40x25 mm o Conduit 20 mm";
+      } else if (tieneEnchufes || tieneEscaleraOVar) {
+        sugerenciaCanalizacion = "Canaleta 20x10 mm o Conduit 16 mm";
+      } else {
+        sugerenciaCanalizacion = "Canaleta 10x10 mm o Conduit 16 mm";
+      }
+    } else {
+      sugerenciaCanalizacion = "Tubería Manguera / Conduit Embutido 16/20 mm";
+    }
+
+    let recargoEmbutido = (tipo === "Embutida") ? (metros * 2500) : 0;
+    const totalManoObra = costoCentros + costoManoObraRecorrido + recargoEmbutido;
+
+    let listaPuntosMaterialesHTML = "";
+    if (cChuqui > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Cajas Chuqui / Derivación:</span><span class="result-val">${cChuqui} un.</span></div>`;
+    if (pLuz > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Puntos de Luz / Ampolletas:</span><span class="result-val">${pLuz} un.</span></div>`;
+    if (eSimples > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Enchufes Simples:</span><span class="result-val">${eSimples} un.</span></div>`;
+    if (eDobles > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Enchufes Dobles:</span><span class="result-val">${eDobles} un.</span></div>`;
+    if (eTriples > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Enchufes Triples / Especiales:</span><span class="result-val">${eTriples} un.</span></div>`;
+    if (iSimples > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Interruptores Simples (9/12):</span><span class="result-val">${iSimples} un.</span></div>`;
+    if (iDobles > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Interruptores Dobles (9/15):</span><span class="result-val">${iDobles} un.</span></div>`;
+    if (iTriples > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Interruptores Triples (9/32):</span><span class="result-val">${iTriples} un.</span></div>`;
+    if (iEscalera > 0) listaPuntosMaterialesHTML += `<div class="result-item"><span class="result-label">• Interruptores Escalera (9/24):</span><span class="result-val">${iEscalera} juego(s) (${iEscalera * 2} un.)</span></div>`;
+
+    datosResumen.modo = modo;
+    datosResumen.modCobro = modCobro;
+    datosResumen.cChuqui = cChuqui;
+    datosResumen.pLuz = pLuz;
+    datosResumen.eSimples = eSimples;
+    datosResumen.eDobles = eDobles;
+    datosResumen.eTriples = eTriples;
+    datosResumen.iSimples = iSimples;
+    datosResumen.iDobles = iDobles;
+    datosResumen.iTriples = iTriples;
+    datosResumen.iEscalera = iEscalera;
+    datosResumen.totalCentros = totalCentros;
+    datosResumen.metros = metros;
+    datosResumen.costoManoObraRecorrido = costoManoObraRecorrido;
+    datosResumen.tipo = tipo;
+    datosResumen.metrosCablePorLinea = metrosCablePorLinea;
+    datosResumen.tirasTubo = tirasTubo;
+    datosResumen.sugerenciaCanalizacion = sugerenciaCanalizacion;
+    datosResumen.modGabinete = modGabinete;
+    datosResumen.ampGeneral = ampGeneral;
+    datosResumen.ampDisyuntorEnchufes = ampDisyuntorEnchufes;
+    datosResumen.ampDiferencial = ampDiferencial;
+    datosResumen.nuevoAut = nuevoAut;
+    datosResumen.nCirc = nCirc;
+    datosResumen.costoCentros = costoCentros;
+    datosResumen.recargoEmbutido = recargoEmbutido;
+    datosResumen.desglosadoDetalle = desglosadoDetalle;
+    datosResumen.totalManoObra = totalManoObra;
+
+    let htmlCargaResultado = "";
+    if (datosResumen.cargaElectro && datosResumen.cargaElectro.lista.length > 0) {
+      htmlCargaResultado = `
+        <div style="font-size: 0.85rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 12px 0 8px 0; text-transform: uppercase;">Cálculo de Carga & Protecciones</div>
+        <div class="result-item">
+          <span class="result-label">Potencia Total Equipos:</span>
+          <span class="result-val highlight">${datosResumen.cargaElectro.totalWatts.toLocaleString('es-CL')} W (${datosResumen.cargaElectro.corriente.toFixed(1)} A)</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Disyuntor (PIA) Sugerido:</span>
+          <span class="result-val" style="color: #25d366;">${datosResumen.cargaElectro.disyuntor}</span>
+        </div>
+      `;
+    }
+
+    let htmlTableroDesglosado = "";
+    if (modo === 'completa') {
+      htmlTableroDesglosado = `
+        <div class="result-item"><span class="result-label">• Tablero TDA:</span><span class="result-val">${modGabinete} Módulos</span></div>
+        <div class="result-item"><span class="result-label">• Interruptor General:</span><span class="result-val">1 un. (${ampGeneral})</span></div>
+        <div class="result-item"><span class="result-label">• Disyuntores Circuitos (PIA):</span><span class="result-val">${nCirc} un. (${ampDisyuntorEnchufes})</span></div>
+        <div class="result-item"><span class="result-label">• Protección Diferencial:</span><span class="result-val">1 Dif. RCD (${ampDiferencial})</span></div>
+      `;
+    } else {
+      if (nuevoAut === 'si') {
+        htmlTableroDesglosado = `<div class="result-item"><span class="result-label">• Disyuntor Nuevo:</span><span class="result-val">1 Disyuntor PIA ${ampDisyuntorEnchufes}</span></div>`;
+      } else {
+        htmlTableroDesglosado = `<div class="result-item"><span class="result-label">• Conexión Tablero:</span><span class="result-val">A circuito preexistente</span></div>`;
+      }
+    }
+
+    document.getElementById('resDetalleServicio').innerHTML = `
+      <div style="font-size: 0.85rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 12px 0 8px 0; text-transform: uppercase;">Materiales que debe comprar Cliente</div>
+      ${htmlTableroDesglosado}
+      <div class="result-item">
+        <span class="result-label">• Cable Fase (Rojo/Blanco):</span>
+        <span class="result-val">${metrosCablePorLinea} mt. <small style="color:var(--subtext); font-weight:normal;">(+10% mar.)</small></span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">• Cable Neutro (Azul):</span>
+        <span class="result-val">${metrosCablePorLinea} mt. <small style="color:var(--subtext); font-weight:normal;">(+10% mar.)</small></span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">• Cable Tierra (Verde):</span>
+        <span class="result-val">${metrosCablePorLinea} mt. <small style="color:var(--subtext); font-weight:normal;">(+10% mar.)</small></span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">• Tiras Canalización (3m):</span>
+        <span class="result-val">${tirasTubo} tiras</span>
+      </div>
+      ${listaPuntosMaterialesHTML}
+
+      <div style="font-size: 0.85rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 16px 0 8px 0; text-transform: uppercase;">Presupuesto Mano de Obra</div>
+      <div class="result-item">
+        <span class="result-label">Subtotal Puntos Instalados (${totalCentros} pts):</span>
+        <span class="result-val">${fmt(costoCentros)}</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Mano de Obra Cableado (${metros}m):</span>
+        <span class="result-val">${fmt(costoManoObraRecorrido)}</span>
+      </div>
+      ${recargoEmbutido > 0 ? `
+      <div class="result-item">
+        <span class="result-label">Adicional Trabajo Embutido:</span>
+        <span class="result-val">${fmt(recargoEmbutido)}</span>
+      </div>
+      ` : ''}
+
+      ${htmlCargaResultado}
+    `;
+
+    document.getElementById('precioTotal').innerText = fmt(totalManoObra);
+    document.getElementById('results').style.display = 'block';
+  }
+
+  function enviarWhatsApp() {
+    const inputTel = document.getElementById('telefonoCliente');
+    let num = inputTel.value.trim().replace(/\D/g, '');
+
+    if (!num || (num.length !== 9 && num.length !== 11)) {
+      parpadearYEnfocar(inputTel, "Ingresa un número de WhatsApp válido de 9 dígitos.");
+      return;
+    }
+
+    if (num.length === 9) num = "56" + num;
+
+    const ahora = new Date();
+    const fechaStr = ahora.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const horaStr = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const totalFormateado = fmt(datosResumen.totalManoObra) + ".-";
+
+    const firmaContacto = `\n\nAtte.\nMIGUEL ROCO\nTécnico Electricista`;
+
+    let mensaje = "";
+    if (datosResumen.modo === 'revision') {
+      mensaje = 
+`PRESUPUESTO SERVICIO ELÉCTRICO
+
+FECHA: ${fechaStr}
+HORA: ${horaStr}
+
+🛠️ MATERIALES SOLICITADOS:
+• Revisión, Diagnóstico y/o Reparación Eléctrica.
+
+💰 DETALLE PRESUPUESTO:
+TOTAL PRESUPUESTO:
+• Mano de obra: ${totalFormateado}${firmaContacto}`;
+    } else {
+      let listaMaterialesWA = "";
+      if (datosResumen.modo === 'completa') {
+        listaMaterialesWA += `• 1 tablero TDA ${datosResumen.modGabinete} Módulos\n`;
+        listaMaterialesWA += `• 1 Interruptor General (${datosResumen.ampGeneral})\n`;
+        listaMaterialesWA += `• ${datosResumen.nCirc} Disyuntores ${datosResumen.ampDisyuntorEnchufes}\n`;
+        listaMaterialesWA += `• 1 Dif. RCD (${datosResumen.ampDiferencial})\n`;
+      } else if (datosResumen.nuevoAut === 'si') {
+        listaMaterialesWA += `• 1 Disyuntor ${datosResumen.ampDisyuntorEnchufes}\n`;
+      }
+
+      listaMaterialesWA += `• ${datosResumen.metrosCablePorLinea} mt. Cable Fase\n`;
+      listaMaterialesWA += `• ${datosResumen.metrosCablePorLinea} mt. Cable Neutro\n`;
+      listaMaterialesWA += `• ${datosResumen.metrosCablePorLinea} mt. Cable Tierra\n`;
+      listaMaterialesWA += `• ${datosResumen.tirasTubo} Tiras Canalización (3m)\n`;
+
+      if (datosResumen.cChuqui > 0) listaMaterialesWA += `• ${datosResumen.cChuqui} Cajas Derivación\n`;
+      if (datosResumen.pLuz > 0) listaMaterialesWA += `• ${datosResumen.pLuz} Iluminación\n`;
+      if (datosResumen.eSimples > 0) listaMaterialesWA += `• ${datosResumen.eSimples} Enchufe Simple\n`;
+      if (datosResumen.eDobles > 0) listaMaterialesWA += `• ${datosResumen.eDobles} Enchufe Doble\n`;
+      if (datosResumen.eTriples > 0) listaMaterialesWA += `• ${datosResumen.eTriples} Enchufe Triple\n`;
+      if (datosResumen.iSimples > 0) listaMaterialesWA += `• ${datosResumen.iSimples} Interruptor (9/12)\n`;
+      if (datosResumen.iDobles > 0) listaMaterialesWA += `• ${datosResumen.iDobles} Interruptor (9/15)\n`;
+      if (datosResumen.iTriples > 0) listaMaterialesWA += `• ${datosResumen.iTriples} Interruptor (9/32)\n`;
+      if (datosResumen.iEscalera > 0) listaMaterialesWA += `• ${datosResumen.iEscalera} Juego Escalera (9/24)\n`;
+
+      let cargaMsg = "";
+      if (datosResumen.cargaElectro && datosResumen.cargaElectro.lista.length > 0) {
+        cargaMsg = `⚡ CÁLCULO DE CARGA Y EQUIPOS:\n\n• Potencia Total: ${datosResumen.cargaElectro.totalWatts.toLocaleString('es-CL')} W (${datosResumen.cargaElectro.corriente.toFixed(1)} A)\n\n`;
+      }
+
+      let tituloProyecto = datosResumen.modo === 'completa' ? 'INSTALACIÓN ELÉCTRICA NUEVA (DESDE CERO)' : 'AMPLIACIÓN Y MODIFICACIÓN ELÉCTRICA';
+      
+      mensaje = 
+`PRESUPUESTO ${tituloProyecto}
+
+FECHA: ${fechaStr}
+HORA: ${horaStr}
+
+🧰 MATERIALES SOLICITADOS:
+${listaMaterialesWA}
+${cargaMsg}💰 DETALLE PRESUPUESTO:
+• Total Puntos Intervenidos: ${datosResumen.totalCentros} punto(s)
+
+TOTAL PRESUPUESTO:
+• Mano de obra: ${totalFormateado}${firmaContacto}`;
+    }
+    const url = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  }
+</script>
+</body>
+</html>
